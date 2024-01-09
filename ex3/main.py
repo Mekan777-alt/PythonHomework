@@ -1,90 +1,102 @@
-import io, os, itertools, random
+import io
+import os
+import random
 
 
-def readTasks():
+def read_tasks():
     result = []
-    totalTasks = len(os.listdir('text/tasks'))
-    print(totalTasks+1)
-    for i in range(1,totalTasks):
+    total_tasks = len(os.listdir('text/tasks'))
+    print(total_tasks + 1)
+
+    for i in range(1, total_tasks):
         result.append([])
-        totalVariants = len(os.listdir('text/tasks/%d' % i))
-        for k in range(1,totalVariants):
-            result[i-1].append(readFile('text/tasks/%d/%d.tex' % (i,k)))
+        total_variants = len(os.listdir('text/tasks/%d' % i))
+
+        for k in range(1, total_variants):
+            result[i - 1].append(read_file('text/tasks/%d/%d.tex' % (i, k)))
+
     return result
 
-def readStudents():
-    file = io.open("students.txt", encoding='utf-8')
-    result = file.readlines()
-    file.close()
+
+def read_students():
+    with io.open("students.txt", encoding='utf-8') as file:
+        result = file.readlines()
+
     return result
 
-def generateVariants(tasks, total):
-    counts = []
-    for i in tasks:
-        counts.append(len(i))
+
+def generate_variants(tasks, total):
+    counts = [len(i) for i in tasks]
     result = set()
+
     while len(result) < total:
-        result.add(generateVariant(counts))
+        result.add(generate_variant(counts))
+
     return list(result)
 
-def generateVariant(counts):
-    result = []
-    for i in range(len(counts)):
-        result.append(random.randint(1,counts[i]))
-    return tuple(result)
 
-def readFile(name):
-    file = io.open(name, encoding='utf-8')
-    text = file.read()
-    file.close()
-    return text
+def generate_variant(counts):
+    return tuple(random.randint(1, count) for count in counts)
+
+
+def read_file(name):
+    try:
+        with io.open(name, encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"Error: File {name} not found.")
+        return ''
 
 
 def main():
     random.seed(1183)
+
     print("Reading templates...")
-    head = readFile('templates/head.tex')
-    qStart = readFile('templates/qStart.tex')
-    qStart2 = readFile('templates/qStart2.tex')
-    qFinish = readFile('templates/qFinish.tex')
-    tail = readFile('templates/tail.tex')
+    head = read_file('templates/head.tex')
+    q_start = read_file('templates/qStart.tex')
+    q_start2 = read_file('templates/qStart2.tex')
+    q_finish = read_file('templates/qFinish.tex')
+    tail = read_file('templates/tail.tex')
 
     print("Reading tasks...")
-    tasks = readTasks()
+    tasks = read_tasks()
 
     print("Reading students...")
-    students = readStudents()
+    students = read_students()
 
     print("Generating variants...")
-    variants = generateVariants(tasks, len(students))
+    variants = generate_variants(tasks, len(students))
     random.shuffle(variants)
-
 
     os.makedirs(os.path.dirname("text/latex/main.tex"), exist_ok=True)
 
-    out = io.open("text/latex/main.tex", "w", encoding='utf-8')
-    print("Making main.tex file...")
+    with io.open("text/latex/main.tex", "w", encoding='utf-8') as out:
+        print("Making main.tex file...")
+        out.write(head)
 
-    out.write(head)
-    for i in range(len(variants)):
-        out.write(qStart + str(students[i]) + qStart2)
-        for taskNumber, task in enumerate(tasks):
-            out.write(task[variants[i][taskNumber]-1])
-        out.write(qFinish)
-    out.write(tail)
-    out.close()
+        for i in range(len(variants)):
+            out.write(q_start + str(students[i]) + q_start2)
 
-    out = io.open("text/latex/dump.tex", "w", encoding='utf-8')
-    print("Making dump.tex file...")
+            for task_number, task in enumerate(tasks):
+                out.write(task[variants[i][task_number] - 1])
 
-    out.write(head)
-    for i in range(len(tasks)):
-        out.write(qStart + str(i+1) + qStart2)
-        for k in range(len(tasks[i])):
-            out.write(tasks[i][k])
-        out.write(qFinish)
-    out.write(tail)
-    out.close()
+            out.write(q_finish)
+
+        out.write(tail)
+
+    with io.open("text/latex/dump.tex", "w", encoding='utf-8') as out:
+        print("Making dump.tex file...")
+        out.write(head)
+
+        for i in range(len(tasks)):
+            out.write(q_start + str(i + 1) + q_start2)
+
+            for k in range(len(tasks[i])):
+                out.write(tasks[i][k])
+
+            out.write(q_finish)
+
+        out.write(tail)
 
     print("Done!")
 
