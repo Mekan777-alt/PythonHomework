@@ -1,35 +1,38 @@
 import io
 import os
-import itertools
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()
 
 
 class LatexGenerator:
     def __init__(self):
         self.random_seed = 1183
         random.seed(self.random_seed)
-        self.head = self.read_file('templates/head.tex')
-        self.q_start = self.read_file('templates/qStart.tex')
-        self.q_start2 = self.read_file('templates/qStart2.tex')
-        self.q_finish = self.read_file('templates/qFinish.tex')
-        self.tail = self.read_file('templates/tail.tex')
+        self.head = self.read_file('../templates/head.tex')
+        self.q_start = self.read_file('../templates/qStart.tex')
+        self.q_start2 = self.read_file('../templates/qStart2.tex')
+        self.q_finish = self.read_file('../templates/qFinish.tex')
+        self.tail = self.read_file('../templates/tail.tex')
 
         self.tasks = self.read_tasks()
         self.students = self.read_students()
 
     def read_tasks(self):
         result = []
-        total_tasks = len(os.listdir('text/tasks'))
-        print(total_tasks + 1)
+        total_tasks = len(os.listdir('../text/tasks'))
+        logger.info(total_tasks + 1)
         for i in range(1, total_tasks):
             result.append([])
-            total_variants = len(os.listdir('text/tasks/%d' % i))
+            total_variants = len(os.listdir('../text/tasks/%d' % i))
             for k in range(1, total_variants):
-                result[i - 1].append(self.read_file('text/tasks/%d/%d.tex' % (i, k)))
+                result[i - 1].append(self.read_file('../text/tasks/%d/%d.tex' % (i, k)))
         return result
 
     def read_students(self):
-        with io.open("students.txt", encoding='utf-8') as file:
+        with io.open("../students.txt", encoding='utf-8') as file:
             result = file.readlines()
         return result
 
@@ -54,7 +57,7 @@ class LatexGenerator:
             out.write(content)
 
     def make_main_tex_file(self):
-        print("Making main.tex file...")
+        logger.info("Making main.tex file...")
         variants = self.generate_variants(len(self.students))
         random.shuffle(variants)
 
@@ -66,10 +69,10 @@ class LatexGenerator:
             main_content += self.q_finish
         main_content += self.tail
 
-        self.make_tex_file("text/latex/main.tex", main_content)
+        self.make_tex_file("../text/latex/main.tex", main_content)
 
     def make_dump_tex_file(self):
-        print("Making dump.tex file...")
+        logger.info("Making dump.tex file...")
 
         dump_content = self.head
         for i in range(len(self.tasks)):
@@ -79,12 +82,12 @@ class LatexGenerator:
             dump_content += self.q_finish
 
         dump_content += self.tail
-        self.make_tex_file("text/latex/dump.tex", dump_content)
+        self.make_tex_file("../text/latex/dump.tex", dump_content)
 
     def run(self):
         self.make_main_tex_file()
         self.make_dump_tex_file()
-        print("Done!")
+        logger.info("Done!")
 
 
 if __name__ == "__main__":

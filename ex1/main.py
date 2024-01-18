@@ -1,5 +1,5 @@
-from ex1.user import User
-from ex1.contact import Contact
+from user import User
+from contact import Contact
 
 user1 = User("Mekan")
 user2 = User("Andrey")
