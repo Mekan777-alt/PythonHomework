@@ -1,5 +1,6 @@
 from user import User
 from contact import Contact
+from admin import Admin
 
 user1 = User("Mekan")
 user2 = User("Andrey")

@@ -1,20 +1,20 @@
-class Admin:
-    @staticmethod
-    def add_contact_to_phone_book(contact, phone_book):
-        phone_book.add_contact(contact)
+from ex1.user import User
 
-    @staticmethod
-    def remove_contact_to_phone_book(contact, phone_book):
-        phone_book.delete_contact(contact)
 
-    @staticmethod
-    def add_friends(user, friend):
-        user.add_friends(friend)
+class Admin(User):
+    def __init__(self, firstname):
+        super().__init__(firstname)
 
-    @staticmethod
-    def add_phone_book(user, tag):
-        user.add_phone_book(tag)
+    def add_contact_from_to_user(self, to_user, contact, tag):
+        if tag in to_user.phone_books[tag]:
+            to_user.phone_book[tag].add_contact(contact)
+        else:
+            raise ValueError(f"Нет телефонной книги {tag} для пользователя {to_user}")
 
-    @staticmethod
-    def share_phone_books(user1, user2, tag):
-        user1.share_phone_books(user2, tag)
+    def delete_contact_from_to_user(self, user, tag, contact):
+        if tag in user.phone_books[tag]:
+            user.phone_books[tag].delete_contact(contact)
+        else:
+            raise ValueError(f"Нет телефонной книги {tag} для пользователя {user}")
+
+
